@@ -1,0 +1,6 @@
+nltk
+tesseract
+pdf2image
+torch
+torchvision
+transformers
