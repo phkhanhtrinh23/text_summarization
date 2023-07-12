@@ -13,8 +13,8 @@ from transformers import pipeline
 import textwrap
 import streamlit as st
 import tempfile
-# nltk.download("stopwords")
-# nltk.download("punkt")
+nltk.download("stopwords")
+nltk.download("punkt")
 
 
 def extractOCR(file):
@@ -87,16 +87,17 @@ def summarize_custom(text, filename):
     # This factor can be adjusted to reduce/expand the length of the summary
     summary = ""
     for sentence in sentences:
-            if sentence[:12] in sentenceValue and sentenceValue[sentence[:12]] > (3.0 * average):
-                summary += " " + " ".join(sentence.split())
+        if sentence[:12] in sentenceValue and sentenceValue[sentence[:12]] > (2.0 * average):
+            summary += " " + " ".join(sentence.split())
 
     # Process the text in summary and write it to a new file
     summary = re.sub("’", "'", summary)
     summary = re.sub("[^a-zA-Z0-9'\"():;,.!?— ]+", " ", summary)
-    # summaryText = open(os.path.basename(filename).split(".")[0] + "Summary.txt", "w")
-    # summaryText.write(summary)
-    # summaryText.close()
+    summaryText = open(filename.split(".")[0] + "Summary.txt", "w")
+    summaryText.write(summary)
+    summaryText.close()
     st.write("This is the summary:", summary)
+
 
 def summarize_model(text, summarizer, filename):
     # Process text by removing numbers and unrecognized punctuation
@@ -132,9 +133,9 @@ def summarize_model(text, summarizer, filename):
     # Process the text in summary and write it to a new file
     summary = re.sub("’", "'", summary)
     summary = re.sub("[^a-zA-Z0-9'\"():;,.!?— ]+", " ", summary)
-    # summaryText = open(os.path.basename(filename).split(".")[0] + "Summary.txt", "w")
-    # summaryText.write(summary)
-    # summaryText.close()
+    summaryText = open(filename.split(".")[0] + "Summary.txt", "w")
+    summaryText.write(summary)
+    summaryText.close()
     st.write("This is the summary:", summary)
 
 # Scan user input for PDF file name
@@ -146,7 +147,7 @@ def summarize_model(text, summarizer, filename):
 st.title('Text Summarization')
 
 st.subheader('Upload your pdf')
-uploaded_file = st.file_uploader('', type=(['pdf']))
+uploaded_file = st.file_uploader('', type=(['pdf', 'txt']))
 
 temp_file_path = os.getcwd()
 
@@ -162,17 +163,24 @@ if uploaded_file is not None:
 
     st.write("Full path of the uploaded file:", temp_file_path)
 
+file_type = uploaded_file.name.split(".")[1]
+
 # Create choice boxes for the user
 option = st.radio(
-    "Choose your option to summarize",
-    ('custom', 'model'))
+    "Choose your option to summarize:",
+    ('heuristic model', 'large language model'))
 
 if st.button('Run'):
-    if option == "custom":
+    # Extract the text from the file
+    if file_type == "pdf":
         text = extractOCR(temp_file_path)
+    else:
+        text = open(temp_file_path, "r").read()
+
+    # Summarize based on the chosen model
+    if option == "heuristic model":
         summarize_custom(text, temp_file_path)
-    elif option == "model":
-        text = extractOCR(temp_file_path)
+    elif option == "large language model":
         summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
         summarize_model(text, summarizer, temp_file_path)
     else:
