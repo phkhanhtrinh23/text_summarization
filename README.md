@@ -24,9 +24,9 @@ This is an implementation of Text Summarization.
       * Start the app: `streamlit run app.py`.
    - `custom_module`:
       * Install the required packages: `pip install -r requirements.txt`.
-      * Run the file: `python main.py`
-         - `custom` is heuristic summarization.
-         - `model` is summarization using LLMs.
+      * Run the file: `python main.py`:
+         - `summarize_custom()` is heuristic summarization.
+         - `summarize_model()` is summarization using LLMs.
 
 ## Contribution
 
