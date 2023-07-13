@@ -16,6 +16,47 @@ import tempfile
 nltk.download("stopwords")
 nltk.download("punkt")
 
+import torch
+from transformer import get_model
+from preprocess import *
+from beam_search import beam_search
+from torch.autograd import Variable
+
+class ArgumentOpt:
+    def __init__(self):
+        self.load_weights=True
+        self.k=3
+        self.src_lang="en_core_web_sm"
+        self.trg_lang="en_core_web_sm"
+        self.d_model=512
+        self.n_layers=6
+        self.heads=8
+        self.dropout=0.1
+        self.max_strlen=300
+        self.cuda=True
+        self.cuda_device="cuda"
+
+class SpellingCorrection:
+    def __init__(self):
+        self.opt = ArgumentOpt()
+        self.SRC, self.TRG = create_files(self.opt)
+        self.model = get_model(self.opt, len(self.SRC.vocab), len(self.TRG.vocab))
+
+    def translate_sentence(self, sentence):
+        self.model.eval()
+        indexed = []
+        sentence = preprocess(sentence)
+        for tok in sentence:
+            indexed.append(self.SRC.vocab.stoi[tok])
+        sentence = Variable(torch.LongTensor([indexed]))
+        if self.opt.cuda == True:
+            sentence = sentence.to(self.opt.cuda_device)
+        sentence = beam_search(sentence, self.model, self.SRC, self.TRG, self.opt)
+        return sentence.capitalize()
+
+    def __call__(self, sentence):
+        return self.translate_sentence(sentence)
+
 
 def extractOCR(file):
     pages = convert_from_path(file, 500)
@@ -144,44 +185,44 @@ def summarize_model(text, summarizer, filename):
 # pdfFileName = fileName + ".pdf"
 # option = input("Custom extraction or Model extraction? (custom / model)\n")
 
-st.title('Text Summarization')
+# st.title('Text Summarization')
 
-st.subheader('Upload your pdf')
-uploaded_file = st.file_uploader('', type=(['pdf', 'txt']))
+# st.subheader('Upload your pdf')
+# uploaded_file = st.file_uploader('', type=(['pdf', 'txt']))
 
-temp_file_path = os.getcwd()
+# temp_file_path = os.getcwd()
 
-while uploaded_file is None:
-    x = 1
+# while uploaded_file is None:
+#     x = 1
         
-if uploaded_file is not None:
-    # Save the uploaded file to a location
-    temp_file_path = os.path.join("test", uploaded_file.name)
+# if uploaded_file is not None:
+#     # Save the uploaded file to a location
+#     temp_file_path = os.path.join("test", uploaded_file.name)
     
-    with open(temp_file_path, "wb") as temp_file:
-        temp_file.write(uploaded_file.read())
+#     with open(temp_file_path, "wb") as temp_file:
+#         temp_file.write(uploaded_file.read())
 
-    st.write("Full path of the uploaded file:", temp_file_path)
+#     st.write("Full path of the uploaded file:", temp_file_path)
 
-file_type = uploaded_file.name.split(".")[1]
+# file_type = uploaded_file.name.split(".")[1]
 
-# Create choice boxes for the user
-option = st.radio(
-    "Choose your option to summarize:",
-    ('heuristic model', 'large language model'))
+# # Create choice boxes for the user
+# option = st.radio(
+#     "Choose your option to summarize:",
+#     ('heuristic model', 'large language model'))
 
-if st.button('Run'):
-    # Extract the text from the file
-    if file_type == "pdf":
-        text = extractOCR(temp_file_path)
-    else:
-        text = open(temp_file_path, "r").read()
+# if st.button('Run'):
+#     # Extract the text from the file
+#     if file_type == "pdf":
+#         text = extractOCR(temp_file_path)
+#     else:
+#         text = open(temp_file_path, "r").read()
 
-    # Summarize based on the chosen model
-    if option == "heuristic model":
-        summarize_custom(text, temp_file_path)
-    elif option == "large language model":
-        summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-        summarize_model(text, summarizer, temp_file_path)
-    else:
-        print("Not a valid option!")
+#     # Summarize based on the chosen model
+#     if option == "heuristic model":
+#         summarize_custom(text, temp_file_path)
+#     elif option == "large language model":
+#         summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+#         summarize_model(text, summarizer, temp_file_path)
+#     else:
+#         print("Not a valid option!")
