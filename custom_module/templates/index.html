@@ -26,8 +26,21 @@
 {% block context %}
     {% for message in messages %}
         <div class='message'>
-            <p>Text: {{ message['text'] }}</p>
-            <p>Answer: {{ message['answer'] }}</p>
+            <p style="color: blue;">URL for website: {{ message['text_web'] }}</p>
+            <br>
+            <p style="color: blue;">URL for downloading multiple pdf file: {{ message['text_pdf'] }}</p>
+            <br>
+            <p>Answer from a website:</p>
+            <br>
+            {% for values in message['answer_web'] %}
+              <p>{{ values[0] }} <br><br> {{ values[1] }} <br></p>
+            {% endfor %}
+            <br>
+            <p>Answer from multiple pdf files:</p>
+            <br>
+            {% for values in message['answer_pdf'] %}
+              <p>{{ values[0] }} <br><br> {{ values[1] }} <br></p>
+            {% endfor %}
         </div>
     {% endfor %}
     <form action="{{ url_for('create') }}">

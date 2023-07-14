@@ -25,17 +25,25 @@
 {% block context %}
     <div class='message'>
         <form method="post">
-            <label for="text">Text</label>
-            <br>
-            <label for="myfile">Select a file:</label>
+            <label for="text_web">URL for website</label>
+            <br><br>
+            <!-- <label for="myfile">Select a file:</label>
             <input type="file" id="myfile" name="myfile">
-            <br>
-            <textarea name="text"
+            <br> -->
+            <textarea name="text_web"
                    placeholder="Text"
-                   rows="5"
+                   rows="2"
                    cols="60"
-                   >{{ request.form['text'] }}</textarea>
-            <br>
+                   >{{ request.form['text_web'] }}</textarea>
+            <br><br>
+            <label for="text_pdf">URL for PDF file</label>
+            <br><br>
+            <textarea name="text_pdf"
+                   placeholder="Text"
+                   rows="2"
+                   cols="60"
+                   >{{ request.form['text_pdf'] }}</textarea>
+            <br><br>
             <button type="submit" class="btn info">Submit</button>
         </form>
     </div>

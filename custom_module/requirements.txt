@@ -1,5 +1,6 @@
 nltk
 tesseract
+pytessract
 pdf2image
 torch
 torchvision
